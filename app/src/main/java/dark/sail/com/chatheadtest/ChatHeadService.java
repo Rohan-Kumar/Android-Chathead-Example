@@ -20,11 +20,13 @@ public class ChatHeadService extends Service {
     private WindowManager windowManager;
     private ImageView chatHead;
     WindowManager.LayoutParams params;
+    private GestureDetector gestureDetector;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        gestureDetector = new GestureDetector(this, new SingleTapConfirm());
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
@@ -53,7 +55,15 @@ public class ChatHeadService extends Service {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-
+                if (gestureDetector.onTouchEvent(event)) {
+                    Log.d("TAG", "onClick: ");
+                    PackageManager manager = getPackageManager();
+                    Intent intent = manager.getLaunchIntentForPackage("com.whatsapp");
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    startActivity(intent);
+                    // single tap
+                    return true;
+                } else {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             initialX = params.x;
@@ -73,9 +83,8 @@ public class ChatHeadService extends Service {
                     }
                     return false;
                 }
+            }
         });
-
-
 
 
         windowManager.addView(chatHead, params);
@@ -90,9 +99,14 @@ public class ChatHeadService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO Auto-generated method stub
         return null;
     }
 
+    private class SingleTapConfirm extends GestureDetector.SimpleOnGestureListener {
 
+        @Override
+        public boolean onSingleTapUp(MotionEvent event) {
+            return true;
+        }
+    }
 }
